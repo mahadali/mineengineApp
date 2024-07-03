@@ -42,6 +42,18 @@ export const useForgotPassword = ({ onSuccess, onError }) => {
     });
 };
 
+//Delete User
+export const deleteUser = () => {
+    return client.delete(`/users/delete`);
+};
+
+export const useDelete = ({ onSuccess, onError }) => {
+    return useMutation(deleteUser, {
+        onSuccess,
+        onError,
+    });
+};
+
 //OTP Verification
 const otpVerification = (uData) => {
     return client.post('/api/otp-verification', uData);

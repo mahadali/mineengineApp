@@ -9,6 +9,7 @@ import {
     View,
     Text,
     Image,
+    ActivityIndicator,
 } from 'react-native';
 import {
     heightPercentageToDP as hp,
@@ -19,12 +20,14 @@ import { color, sizes } from '../config/theme';
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../context/user-context';
 import { deleteUserToken } from '../utils/token-manager';
+import { deleteUser, useDelete } from '../hooks/auth-hook';
 
 const AuthLayout = ({ children, noPadding, noBackBtn, alignTop, logOutBtn }) => {
     const { user, dispatchUser } = useContext(UserContext);
 
     const navigation = useNavigation();
 
+    const [isLoading, setLoading] = useState(false);
     const [paddHeight, setPaddHeight] = useState(new Animated.Value(0));
 
     useEffect(() => {
@@ -49,14 +52,35 @@ const AuthLayout = ({ children, noPadding, noBackBtn, alignTop, logOutBtn }) => 
         };
     }, []);
 
-    const handleLogout = () => {
-        dispatchUser({
-            type: 'SET_USER',
-            user: {
-                loggedIn: false,
-            },
-        });
-        deleteUserToken();
+    const { mutate: DeleteUser } = useDelete({
+        onSuccess: (res) => {
+            if (res.status == '200') {
+                console.log('Deleted', res.data);
+            }
+        },
+        onError: (err) => {
+            console.log('Error', err);
+        },
+    });
+
+    const handleLogout = async () => {
+        setLoading(true);
+        try {
+            const response = await deleteUser();
+            if (response.status == 200) {
+                dispatchUser({
+                    type: 'SET_USER',
+                    user: {
+                        loggedIn: false,
+                    },
+                });
+                deleteUserToken();
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -81,7 +105,13 @@ const AuthLayout = ({ children, noPadding, noBackBtn, alignTop, logOutBtn }) => 
                 )}
                 {logOutBtn && (
                     <BackBtnWrap activeOpacity={0.8} onPress={handleLogout}>
-                        <BackBtnText>Log Out</BackBtnText>
+                        <BackBtnText>
+                            {isLoading ? (
+                                <ActivityIndicator size="small" color={color.white} />
+                            ) : (
+                                'Log Out'
+                            )}
+                        </BackBtnText>
                     </BackBtnWrap>
                 )}
             </AuthHeader>

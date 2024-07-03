@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { color, sizes } from '../../config/theme';
@@ -7,28 +7,71 @@ import { Platform, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../context/user-context';
 import { setUserToken } from '../../utils/token-manager';
+import { useLogin, useRegister } from '../../hooks/auth-hook';
+import { setAuthToken } from '../../utils/api';
 
 const AuthLanding = () => {
     const { user, dispatchUser } = useContext(UserContext);
 
+    const [guestData, setGuestData] = useState(null);
+
     const navigation = useNavigation();
 
     const handleGuest = () => {
+        const randomNumber = Math.floor(1000 + Math.random() * 9000);
         const data = {
-            firstName: 'Guest',
-            username: 'guest@email.com',
-            email: 'guest@email.com',
+            firstName: 'Guest' + randomNumber,
+            username: `guest${randomNumber}@email.com`,
+            email: `guest${randomNumber}@email.com`,
             password: 'Password12#',
         };
-        setUserToken(data);
-        dispatchUser({
-            type: 'SET_USER',
-            user: {
-                ...data,
-                loggedIn: true,
-            },
-        });
+        setGuestData(data);
     };
+
+    const { mutate: Register, isLoading } = useRegister({
+        onSuccess: (res) => {
+            if (res.status == '200') {
+                if (guestData) {
+                    handleLogin({
+                        username: guestData?.username,
+                        password: guestData?.password,
+                    });
+                }
+            }
+        },
+        onError: (err) => {
+            console.log('Error', err);
+        },
+    });
+
+    const { mutate: handleLogin, isLoading: loginLoading } = useLogin({
+        onSuccess: (res) => {
+            if (res.status == '200') {
+                const data = {
+                    token: res.data.token,
+                    user_id: res.data.user_id,
+                    name: res.data.user_display_name,
+                    email: res.data.user_email,
+                };
+                setUserToken(data);
+                setAuthToken(res.data.token);
+                dispatchUser({
+                    type: 'SET_USER',
+                    user: {
+                        ...data,
+                        loggedIn: true,
+                    },
+                });
+            }
+        },
+        onError: (error) => {
+            console.log(error);
+        },
+    });
+
+    useEffect(() => {
+        Register(guestData);
+    }, [guestData]);
 
     return (
         <>
@@ -66,7 +109,11 @@ const AuthLanding = () => {
 
                 <Divider />
 
-                <CommonButton borderColor={color.white} onPress={handleGuest}>
+                <CommonButton
+                    borderColor={color.white}
+                    onPress={handleGuest}
+                    loading={isLoading || loginLoading}
+                >
                     Login as guest
                 </CommonButton>
             </Wrapper>
