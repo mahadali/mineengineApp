@@ -2,13 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
     Keyboard,
     Platform,
-    SafeAreaView,
     ScrollView,
     StatusBar,
     Animated,
-    View,
-    Text,
-    Image,
     ActivityIndicator,
 } from 'react-native';
 import {
@@ -20,7 +16,7 @@ import { color, sizes } from '../config/theme';
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../context/user-context';
 import { deleteUserToken } from '../utils/token-manager';
-import { deleteUser, useDelete } from '../hooks/auth-hook';
+import { deleteUser } from '../hooks/auth-hook';
 
 const AuthLayout = ({ children, noPadding, noBackBtn, alignTop, logOutBtn }) => {
     const { user, dispatchUser } = useContext(UserContext);
@@ -51,17 +47,6 @@ const AuthLayout = ({ children, noPadding, noBackBtn, alignTop, logOutBtn }) => 
             keyboardDidShowListener.remove();
         };
     }, []);
-
-    const { mutate: DeleteUser } = useDelete({
-        onSuccess: (res) => {
-            if (res.status == '200') {
-                console.log('Deleted', res.data);
-            }
-        },
-        onError: (err) => {
-            console.log('Error', err);
-        },
-    });
 
     const handleLogout = async () => {
         setLoading(true);

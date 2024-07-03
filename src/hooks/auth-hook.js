@@ -35,13 +35,6 @@ const forgotPassword = (uData) => {
     return client.post('/users/forgot_password', uData);
 };
 
-export const useForgotPassword = ({ onSuccess, onError }) => {
-    return useMutation(forgotPassword, {
-        onSuccess,
-        onError,
-    });
-};
-
 //Delete User
 export const deleteUser = () => {
     return client.delete(`/users/delete`);
