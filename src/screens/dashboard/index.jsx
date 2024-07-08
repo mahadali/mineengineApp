@@ -15,7 +15,7 @@ const MainScreen = () => {
     const toast = useToast();
 
     const handleEngineSearch = async () => {
-        if (searchText.length > 7) {
+        if (searchText.length > 6) {
             setLoading(true);
             setEngineData(null);
             try {
@@ -62,9 +62,7 @@ const MainScreen = () => {
                     elevation: 5,
                 }}
             >
-                <PageCardText>
-                    Enter a YD engine serial number to validate it's status
-                </PageCardText>
+                <PageCardText>Enter a YD engine serial number to validate it's status</PageCardText>
 
                 <PageCardSearch
                     placeholder="eg: Y230802044"

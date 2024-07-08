@@ -42,6 +42,7 @@ const LoginScreen = () => {
                 setLoginErr('');
                 const data = {
                     token: res.data.token,
+                    user_id: res.data.token,
                     name: res.data.user_display_name,
                     email: res.data.user_email,
                 };
