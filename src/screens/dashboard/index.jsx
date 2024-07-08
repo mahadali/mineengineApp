@@ -15,7 +15,7 @@ const MainScreen = () => {
     const toast = useToast();
 
     const handleEngineSearch = async () => {
-        if (searchText.length > 9) {
+        if (searchText.length > 7) {
             setLoading(true);
             setEngineData(null);
             try {
